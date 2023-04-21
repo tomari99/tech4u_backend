@@ -7,16 +7,25 @@ import { connect } from "./utils/db";
 import { userRouter } from "./resources/user/userRouter";
 import { adminProtect, protect, signin, signup } from "./utils/auth";
 import { adminCoursesRouter } from "./resources/admin/adminRouter";
+import { configureUpload } from "./utils/fileUpload";
+
 const app = express();
+
+app.use("/uploads", express.static("uploads"));
+
 app.use(cors());
 app.use(json());
 app.use(morgan("dev"));
 app.use(urlencoded({ extended: true }));
-app.post("/signup", signup);
+
+const destination = "./uploads/users";
+const upload = configureUpload(destination);
+app.post("/signup", upload.single("userPhoto"), signup);
 app.post("/signin", signin);
 
 app.use("/api", protect);
 app.use("/api/admin", adminProtect);
+
 app.use("/api/courses", coursesRouter);
 app.use("/api/users", userRouter);
 app.use("/api/admin/courses", adminCoursesRouter);

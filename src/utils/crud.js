@@ -1,10 +1,14 @@
 import mongoose, { model } from "mongoose";
 
 export const getOne = (model) => async (req, res) => {
-  const courseObjectId = new mongoose.Types.ObjectId(req.params.id);
-  console.log(courseObjectId);
+  const objId = new mongoose.Types.ObjectId(req.params.id);
+
+  if (!objId) {
+    return res.status(400).json({ error: "Invalid ID" });
+  }
+
   try {
-    const doc = await model.findOne({ _id: courseObjectId }).lean().exec();
+    const doc = await model.findOne({ _id: objId }).lean().exec();
 
     if (!doc) {
       return res.status(400).end();
@@ -39,32 +43,16 @@ export const getAcceptedCourse = (model) => async (req, res) => {
   }
 };
 
-// export const createOne = (model) => async (req, res) => {
-//   const createdBy = req.user._id;
-//   try {
-//     const doc = await model.create({ ...req.body, createdBy });
-//     res.status(201).json({ data: doc });
-//   } catch (e) {
-//     console.error(e);
-//     res.status(400).end();
-//   }
-// };
-
-// export const createOne = (model) => async (req, res) => {
-//   const createdBy = mongoose.Types.ObjectId(req.params.userId);
-//   try {
-//     const doc = await model.create({ ...req.body, createdBy });
-//     res.status(201).json({ data: doc });
-//   } catch (e) {
-//     console.error(e);
-//     res.status(400).end();
-//   }
-// };
-
 export const createOne = (model) => async (req, res) => {
   const createdBy = req.user._id;
+  const { fieldname, path } = req.file;
+
   try {
-    const doc = await model.create({ ...req.body, createdBy });
+    const doc = await model.create({
+      ...req.body,
+      createdBy,
+      [fieldname]: path,
+    });
     return res.status(201).json({ data: doc });
   } catch (e) {
     console.error(e);
@@ -73,12 +61,16 @@ export const createOne = (model) => async (req, res) => {
 };
 
 export const updateOne = (model) => async (req, res) => {
-  const courseObjectId = new mongoose.Types.ObjectId(req.params.id);
+  const objId = new mongoose.Types.ObjectId(req.params.id);
+
+  if (!objId) {
+    return res.status(400).json({ error: "Invalid ID" });
+  }
   try {
     const updatedDoc = await model
       .findOneAndUpdate(
         {
-          _id: courseObjectId,
+          _id: objId,
         },
         req.body,
         { new: true }
@@ -98,10 +90,14 @@ export const updateOne = (model) => async (req, res) => {
 };
 
 export const removeOne = (model) => async (req, res) => {
-  const courseObjectId = new mongoose.Types.ObjectId(req.params.id);
+  const objId = new mongoose.Types.ObjectId(req.params.id);
+
+  if (!objId) {
+    return res.status(400).json({ error: "Invalid ID" });
+  }
   try {
     const removed = await model.findOneAndRemove({
-      _id: courseObjectId,
+      _id: objId,
     });
 
     if (!removed) {
@@ -117,15 +113,15 @@ export const removeOne = (model) => async (req, res) => {
 
 // admin course accept
 export const courseAccept = (model) => async (req, res) => {
-  const courseObjectId = new mongoose.Types.ObjectId(req.params.id);
+  const objId = new mongoose.Types.ObjectId(req.params.id);
 
-  if (!courseObjectId) {
+  if (!objId) {
     return res.status(400).json({ error: "Invalid ID" });
   }
 
   try {
     const updatedDoc = await model.findOneAndUpdate(
-      { _id: courseObjectId },
+      { _id: objId },
       { $set: { status: "accepted" } },
       { new: true }
     );

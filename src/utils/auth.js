@@ -17,12 +17,13 @@ export const verifyToken = (token) =>
   });
 
 export const signup = async (req, res) => {
+  const { fieldname, path } = req.file;
   if (!req.body.email || !req.body.password) {
     return res.status(400).send({ message: "need email and password" });
   }
 
   try {
-    const user = await User.create(req.body);
+    const user = await User.create({ ...req.body, [fieldname]: path });
     const token = newToken(user);
     return res.status(201).send({ token });
   } catch (e) {

@@ -11,12 +11,20 @@ const courseSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    coursePhoto: String,
-    shortDesc: {
+    coursePhoto: {
       type: String,
       required: true,
     },
-    longDesc: String,
+    desc: {
+      type: String,
+      required: true,
+    },
+
+    isUdemyDaily: {
+      type: Boolean,
+      default: false,
+    },
+
     createdBy: {
       type: mongoose.SchemaTypes.ObjectId,
       ref: "user",

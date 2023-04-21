@@ -8,11 +8,10 @@ adminCoursesRouter
   .route("/:id")
   .get(controllers.getOne)
   .patch(controllers.courseAccept)
-  // .patch((req, res) => {
-  //   res.send({ message: "patched" });
-  // })
+
   .delete(controllers.removeOne);
 
+// --------------- Route Test ---------------
 // adminCoursesRouter.route("/").get((req, res) => {
 //   return res.send("get");
 // });
