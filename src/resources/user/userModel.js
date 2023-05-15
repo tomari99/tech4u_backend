@@ -6,7 +6,6 @@ const userSchema = new mongoose.Schema(
     userName: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
     },
     email: {
@@ -42,7 +41,7 @@ userSchema.pre("save", function (next) {
     return next();
   }
 
-  bcrypt.hash(this.password, 8, (err, hash) => {
+  bcrypt.hash(this.password, 10, (err, hash) => {
     if (err) {
       return next(err);
     }

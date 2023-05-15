@@ -10,3 +10,5 @@ coursesRouter
   .route("/")
   .get(controllers.getAcceptedCourse)
   .post(upload.single("coursePhoto"), controllers.createOne);
+
+coursesRouter.route("/:id").get(controllers.getOne);

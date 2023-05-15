@@ -1,26 +1,9 @@
 import { Router } from "express";
-import controllers from "./adminCourseController";
+import { configureUpload } from "../../utils/fileUpload";
+import { signup } from "../../utils/auth";
 
-export const adminCoursesRouter = Router();
-adminCoursesRouter.route("/").get(controllers.getMany);
+export const adminRouter = Router();
+const destination = "./uploads/users";
+const upload = configureUpload(destination);
 
-adminCoursesRouter
-  .route("/:id")
-  .get(controllers.getOne)
-  .patch(controllers.courseAccept)
-
-  .delete(controllers.removeOne);
-
-// --------------- Route Test ---------------
-// adminCoursesRouter.route("/").get((req, res) => {
-//   return res.send("get");
-// });
-
-// adminCoursesRouter
-//   .route("/:id")
-//   .get((req, res) => {
-//     return res.send("specific id");
-//   })
-//   .patch((req, res) => {
-//     return res.send("Patched");
-//   });
+adminRouter.route("/").post(upload.single("userPhoto"), signup);

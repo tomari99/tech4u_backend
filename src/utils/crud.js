@@ -1,4 +1,5 @@
 import mongoose, { model } from "mongoose";
+import { User } from "../resources/user/userModel";
 
 export const getOne = (model) => async (req, res) => {
   const objId = new mongoose.Types.ObjectId(req.params.id);
@@ -11,13 +12,14 @@ export const getOne = (model) => async (req, res) => {
     const doc = await model.findOne({ _id: objId }).lean().exec();
 
     if (!doc) {
-      return res.status(400).end();
+      return res
+        .status(404)
+        .json({ message: "Can't found the document with that ID" });
     }
 
     return res.status(200).json({ data: doc });
   } catch (e) {
-    console.error(e);
-    return res.status(400).end();
+    return res.status(400).end({ message: "Bad Request" });
   }
 };
 
@@ -28,35 +30,44 @@ export const getMany = (model) => async (req, res) => {
 
     return res.status(200).json({ data: docs });
   } catch (e) {
-    console.error(e);
-    return res.status(400).end();
+    return res.status(400).end({ message: "Bad Request" });
   }
 };
 
 export const getAcceptedCourse = (model) => async (req, res) => {
   try {
-    const docs = await model.find({ status: "accepted" }).lean().exec();
+    const docs = await model
+      .find({ status: "accepted" })
+      .select("-__v")
+      .lean()
+      .exec();
     return res.status(200).json({ data: docs });
   } catch (error) {
     console.error(error);
-    return res.status(400).end();
+    return res.status(400).json({ message: "Bad Request" });
   }
 };
 
 export const createOne = (model) => async (req, res) => {
+  // console.log(req.user._id);
   const createdBy = req.user._id;
   const { fieldname, path } = req.file;
-
   try {
     const doc = await model.create({
       ...req.body,
       createdBy,
       [fieldname]: path,
     });
+    const userId = req.user._id;
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userId },
+      { $push: { courses: doc._id } },
+      { new: true }
+    );
     return res.status(201).json({ data: doc });
   } catch (e) {
     console.error(e);
-    return res.status(400).end();
+    return res.status(400).end({ message: "Bad Request" });
   }
 };
 
@@ -64,7 +75,7 @@ export const updateOne = (model) => async (req, res) => {
   const objId = new mongoose.Types.ObjectId(req.params.id);
 
   if (!objId) {
-    return res.status(400).json({ error: "Invalid ID" });
+    return res.status(404).json({ error: "Invalid ID" });
   }
   try {
     const updatedDoc = await model
@@ -79,7 +90,7 @@ export const updateOne = (model) => async (req, res) => {
       .exec();
 
     if (!updatedDoc) {
-      return res.status(400).end();
+      return res.status(400).end({ message: "Bad Request" });
     }
 
     return res.status(200).json({ data: updatedDoc });
@@ -93,7 +104,7 @@ export const removeOne = (model) => async (req, res) => {
   const objId = new mongoose.Types.ObjectId(req.params.id);
 
   if (!objId) {
-    return res.status(400).json({ error: "Invalid ID" });
+    return res.status(404).json({ error: "Invalid ID" });
   }
   try {
     const removed = await model.findOneAndRemove({
@@ -131,9 +142,11 @@ export const courseAccept = (model) => async (req, res) => {
     return res.status(200).json({ data: updatedDoc });
   } catch (error) {
     console.error(error);
-    return res.status(400).end();
+    return res.status(400).end({ message: "Bad Request" });
   }
 };
+
+// get reported course and reported user
 
 export const crudControllers = (model) => ({
   courseAccept: courseAccept(model),

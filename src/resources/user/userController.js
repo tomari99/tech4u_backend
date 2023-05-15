@@ -29,16 +29,12 @@ export const updateUser = async (req, res) => {
     return res.status(400).end();
   }
 };
-
-// export const createUser = async (req, res) => {
-//   const { fieldname, path } = req.file;
-//   console.log(req.body);
-//   console.log(fieldname, path);
-//   // try {
-//   //   const newUser = await User.create({ ...req.body, [fieldname]: path });
-//   //   return res.status(201).json({ data: newUser });
-//   // } catch (error) {
-//   //   console.error(error);
-//   //   return res.status(400).end();
-//   // }
-// };
+export const removeUser = async (req, res) => {
+  try {
+    const removeUser = await User.findByIdAndRemove(req.user._id);
+    res.status(200).json({ data: removeUser });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).end();
+  }
+};

@@ -36,6 +36,8 @@ const courseSchema = new mongoose.Schema(
       default: "pending",
       lowercase: true,
     },
+
+    lecturer: String,
   },
   { timestamps: true }
 );
